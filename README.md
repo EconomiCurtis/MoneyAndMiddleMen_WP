@@ -8,7 +8,7 @@ This repo provides some of the supporting code and data to generate the figures,
 
 Original transactions data is currently proprietary, and non-disclosure agreements with Valve Corporation prevent the authors from sharing it broadly, without their explicit premission. We are further limited by the fact that the original dataset was nearly 1-TB in size, making it difficult to share. 
 
-Since most of the figures are derived from aggregated, or otherwise non-individually identifying data, we provide their code here. 
+However, since most of the figures are derived from aggregated, or otherwise non-individually identifying data, we provide their code here. 
 
 If you have any questions as to how the authors came to their results, or would like to request anythign specific, please do not hesitate to ask.
 
