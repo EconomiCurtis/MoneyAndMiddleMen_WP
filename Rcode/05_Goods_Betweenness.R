@@ -338,29 +338,22 @@ ggsave(
 #pdf 10w x 4.5h for paper, not too important of a plot
 #pdf 12w x 6h
 
-```
 
-
-```{r, echo=F}
-
-load(paste(
-"/home/rstudio/rstudio_shared/master/Valve_NetworkStructure/GoodsNetwork.nodeLevelStats_HiLoPriceBreakdown_V1_",
-".RData",
-sep=""))
+load("data/GoodsNetwork.nodeLevelStats_HiLoPriceBreakdown_V1_.RData")
 
 MoneyDefIDs = read.table(text ="
-i 'Item'
-Money  'Money'
-5021_440_6  'Key'
-5002_440_6  'Refined Metal'
-5001_440_6  'Reclaimed Metal'
-5000_440_6  'Scrap Metal'
-126_440_6  'Bills Hat'
-143_440_6  'Earbuds'
-5068_440_6_40  'Salvaged Mann Co. Supply Crate Series 40            ' 
-5022_440_6  'Mann Co. Supply Crate'
-5072_440_6  'All Other Items'
-", header = T)
+                                i 'Item'
+                                Money  'Money'
+                                5021_440_6  'Key'
+                                5002_440_6  'Refined Metal'
+                                5001_440_6  'Reclaimed Metal'
+                                5000_440_6  'Scrap Metal'
+                                126_440_6  'Bills Hat'
+                                143_440_6  'Earbuds'
+                                5068_440_6_40  'Salvaged Mann Co. Supply Crate Series 40            ' 
+                                5022_440_6  'Mann Co. Supply Crate'
+                                5072_440_6  'All Other Items'
+                                  ", header = T)
 # 666_440_6     'B.O.M.C.'
 #                          5001_440_6  'Reclaimed Metal'
 #                          5000_440_6  'Scrap Metal'
@@ -370,8 +363,8 @@ Money  'Money'
 MoneyDefIDs$Item <- factor(MoneyDefIDs$Item, levels = MoneyDefIDs$Item)
 
 GoodsNetwork.nodeLevelStats.plot <- dplyr::left_join(
-GoodsNetwork.nodeLevelStats, MoneyDefIDs, 
-by = "i"
+  GoodsNetwork.nodeLevelStats, MoneyDefIDs, 
+  by = "i"
 )
 
 
@@ -383,98 +376,102 @@ getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 #unique(GoodsNetwork.nodeLevelStats$Price)
 # [1] "Low, <0.95"              "high, > 7"               "mid, Price < 7 & > 0.95"
 
-library(scales)
 
-ggplot2::ggplot(
-GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(i %in% MoneyDefIDs$i &
-Price %in% c("high, > 5"))
+betweenness_TopMoneyItems_HiVal <- ggplot2::ggplot(
+  GoodsNetwork.nodeLevelStats.plot %>%
+    dplyr::filter(i %in% MoneyDefIDs$i &
+                    Price %in% c("high, > 5"))
 ) + 
-geom_line(
-data = (GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(
-Price %in% c("high, > 5")
-& is.na(Item)
-)), 
-aes(x = as.Date(Date),
-y = betweenness_norm,
-group = i),
-size = 1, 
-colour = "grey"
-) +
-geom_line(
-data = (
-GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(
-Price %in% c("high, > 5")
-& Item %in% MoneyDefIDs$Item[1:10]
-)
-),
-aes(
-x = as.Date(Date), 
-y = betweenness_norm, 
-color = Item, 
-shape = Item,
-linetype = Item), 
-size = 1) +
-geom_point(
-data = (
-GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(
-Date %in% as.character(as.Date(seq(0,93, by = 4)*7, origin = "2011-08-15"))
-& Price %in% c("high, > 5")
-& Item %in% MoneyDefIDs$Item[1:10]
-)
-),
-aes(
-x = as.Date(Date), 
-y = betweenness_norm, 
-colour = Item,
-shape = Item),
-size = 4) +
-theme_bw() + 
-scale_x_date(labels = date_format("%b-%Y"), 
-breaks = "6 month", 
-minor_breaks = "1 month") + 
-xlab("Date") + 
-ylab("Betweenness (Normalized)") +
-#ggtitle("Item Betweeness, high value items") +
-CurtisGGplotTheme + 
-theme(
-legend.position = "top") +
-guides(col = guide_legend(ncol = 4)) +
-theme(legend.title=element_blank()) + 
-theme(legend.key.width = unit(2.1, "cm"))+
-scale_colour_manual(values = getPalette(colourCount)[2:11]) +
-scale_shape_manual(values = c(17, 15,0,7, 1,18, 5,8,32,32)) +
-scale_linetype_manual(values = c(2,3,4,5,6,2,3,4,1))
+  geom_rect(data = ValveSales, 
+            aes(xmin = as.Date(StartDate), xmax = as.Date(EndDate), 
+                ymin=-Inf, ymax=+Inf), fill='cadetblue4', alpha=0.25) +
+  geom_line(
+    data = (GoodsNetwork.nodeLevelStats.plot %>%
+              dplyr::filter(
+                Price %in% c("high, > 5")
+                & is.na(Item)
+              )), 
+    aes(x = as.Date(Date),
+        y = betweenness_norm,
+        group = i),
+    size = 1, 
+    colour = "grey"
+  ) +
+  geom_line(
+    data = (
+      GoodsNetwork.nodeLevelStats.plot %>%
+        dplyr::filter(
+          Price %in% c("high, > 5")
+          & Item %in% MoneyDefIDs$Item[1:10]
+        )
+    ),
+    aes(
+      x = as.Date(Date), 
+      y = betweenness_norm, 
+      color = Item, 
+      shape = Item,
+      linetype = Item), 
+    size = 1) +
+  geom_point(
+    data = (
+      GoodsNetwork.nodeLevelStats.plot %>%
+        dplyr::filter(
+          Date %in% as.character(as.Date(seq(0,93, by = 4)*7, origin = "2011-08-15"))
+          & Price %in% c("high, > 5")
+          & Item %in% MoneyDefIDs$Item[1:10]
+        )
+    ),
+    aes(
+      x = as.Date(Date), 
+      y = betweenness_norm, 
+      colour = Item,
+      shape = Item),
+    size = 4) +
+  theme_bw() + 
+  scale_x_date(labels = date_format(" %b  \n%Y "), 
+               limits = as.Date(c(as.Date("2011-8-01"),as.Date("2013-07-01"))), 
+               breaks = seq(as.Date("2012/1/1"), by = "6 month", length.out = 5), 
+               minor_breaks = date_breaks("1 month")) +
+  xlab("Date") + 
+  ylab("Betweenness (Normalized)") +
+  #ggtitle("Item Betweeness, high value items") +
+  CurtisGGplotTheme + 
+  theme(
+    legend.position = "top") +
+  guides(col = guide_legend(ncol = 4)) +
+  theme(legend.title=element_blank()) + 
+  theme(legend.key.width = unit(2.1, "cm"))+
+  scale_colour_manual(values = getPalette(colourCount)[2:11]) +
+  scale_shape_manual(values = c(17, 15,0,7, 1,18, 5,8,32,32)) +
+  scale_linetype_manual(values = c(2,3,4,5,6,2,3,4,1))
 
 # 10 x 5.5 for paper
 # pdg 10w x 7h
 
+ggsave(
+  file = "figs/betweenness_TopMoneyItems_HiVal.pdf",
+  betweenness_TopMoneyItems_HiVal,
+  width = 10,
+  height = 5.5,
+  units = "in"
+)
 
-```
 
-
-High value goods network betweenness
-
-
-```{r, echo=F}
 
 
 MoneyDefIDs = read.table(text ="
-i 'Item'
-Money  'Money'
-5021_440_6  'Key'
-5002_440_6  'Refined Metal'
-5001_440_6  'Reclaimed Metal'
-5000_440_6  'Scrap Metal'
-126_440_6  'Bills Hat'
-143_440_6  'Earbuds'
-5068_440_6_40  'Salvaged Mann Co. Supply Crate Series 40   ' 
-5022_440_6  'Mann Co. Supply Crate'
-5072_440_6  'All Other Items'
-", header = T)
+          i 'Item'
+          Money  'Money'
+          5021_440_6  'Key'
+          5002_440_6  'Refined Metal'
+          5001_440_6  'Reclaimed Metal'
+          5000_440_6  'Scrap Metal'
+          126_440_6  'Bills Hat'
+          143_440_6  'Earbuds'
+          5068_440_6_40  'Salvaged Mann Co. Supply Crate Series 40   ' 
+          5022_440_6  'Mann Co. Supply Crate'
+          5072_440_6  'All Other Items'
+              ", header = T)
 
 #                         5072_440_6  'Naughty Winter Key 2011'
 #                         5073_440_6  'Nice Winter Key 2011'
@@ -510,76 +507,82 @@ getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 library(scales)
 
 ValveSales = data.frame(
-StartDate = as.Date(c("12/15/2011","6/27/2012","9/6/2012","10/26/2012","12/13/2012","5/14/2013"), "%m/%d/%Y"),
-EndDate   = as.Date(c("1/4/2012","7/11/2012","9/21/2012","11/8/2012","1/3/2013","5/28/2013"), "%m/%d/%Y")
+  StartDate = as.Date(c("12/15/2011","6/27/2012","9/6/2012","10/26/2012","12/13/2012","5/14/2013"), "%m/%d/%Y"),
+  EndDate   = as.Date(c("1/4/2012","7/11/2012","9/21/2012","11/8/2012","1/3/2013","5/28/2013"), "%m/%d/%Y")
 )
 
-ggplot2::ggplot(
-GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(i %in% MoneyDefIDs$i &
-Price %in% c("Low, <0.95"))
+betweenness_TopMoneyItems_LoVal <- ggplot2::ggplot(
+  GoodsNetwork.nodeLevelStats.plot %>%
+    dplyr::filter(i %in% MoneyDefIDs$i &
+                    Price %in% c("Low, <0.95"))
 ) +
-geom_rect(data = ValveSales, aes(xmin = as.Date(StartDate), xmax = as.Date(EndDate), ymin=-Inf, ymax=+Inf), fill='cadetblue4', alpha=0.15) +
-geom_line(
-data = (GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(
-Price %in% c("Low, <0.95" )
-& is.na(Item)
-)), 
-aes(x = as.Date(Date),
-y = betweenness_norm,
-group = i),
-size = 1, 
-colour = "grey"
-) +
-geom_line(
-data = (
-GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(
-Price %in% c("Low, <0.95" )
-& Item %in% MoneyDefIDs$Item[1:10]
-)
-),
-aes(
-x = as.Date(Date), 
-y = betweenness_norm, 
-color = Item, 
-shape = Item,
-linetype = Item), 
-size = 1.2) +
-geom_point(
-data = (
-GoodsNetwork.nodeLevelStats.plot %>%
-dplyr::filter(
-Date %in% as.character(as.Date(seq(0,93, by = 4)*7, origin = "2011-08-15"))
-& Price %in% c("Low, <0.95" )
-& Item %in% MoneyDefIDs$Item[1:10]
-)
-),
-aes(
-x = as.Date(Date), 
-y = betweenness_norm, 
-colour = Item,
-shape = Item),
-size = 4) +
-theme_bw() + 
-scale_x_date(labels = date_format("%b-%Y"), 
-breaks = "6 month", 
-minor_breaks = "1 month") + 
-xlab("Date") + 
-ylab("Betweenness (Normalized)") +
-#ggtitle("Item Betweeness, low value items") +
-CurtisGGplotTheme + 
-theme(legend.position = "top") +
-guides(col = guide_legend(ncol = 4)) +
-theme(legend.title=element_blank())+ 
-theme(legend.key.width = unit(2.1, "cm"))+
-scale_colour_manual(values = getPalette(colourCount)[2:11]) +
-scale_shape_manual(values = c(17, 15,0,7, 1,18, 5,8,32,32)) +
-scale_linetype_manual(values = c(2,3,4,5,6,2,3,4,1))
+  geom_rect(data = ValveSales, aes(xmin = as.Date(StartDate), xmax = as.Date(EndDate), ymin=-Inf, ymax=+Inf), fill='cadetblue4', alpha=0.15) +
+  geom_line(
+    data = (GoodsNetwork.nodeLevelStats.plot %>%
+              dplyr::filter(
+                Price %in% c("Low, <0.95" )
+                & is.na(Item)
+              )), 
+    aes(x = as.Date(Date),
+        y = betweenness_norm,
+        group = i),
+    size = 1, 
+    colour = "grey"
+  ) +
+  geom_line(
+    data = (
+      GoodsNetwork.nodeLevelStats.plot %>%
+        dplyr::filter(
+          Price %in% c("Low, <0.95" )
+          & Item %in% MoneyDefIDs$Item[1:10]
+        )
+    ),
+    aes(
+      x = as.Date(Date), 
+      y = betweenness_norm, 
+      color = Item, 
+      shape = Item,
+      linetype = Item), 
+    size = 1.2) +
+  geom_point(
+    data = (
+      GoodsNetwork.nodeLevelStats.plot %>%
+        dplyr::filter(
+          Date %in% as.character(as.Date(seq(0,93, by = 4)*7, origin = "2011-08-15"))
+          & Price %in% c("Low, <0.95" )
+          & Item %in% MoneyDefIDs$Item[1:10]
+        )
+    ),
+    aes(
+      x = as.Date(Date), 
+      y = betweenness_norm, 
+      colour = Item,
+      shape = Item),
+    size = 4) +
+  theme_bw() + 
+  scale_x_date(labels = date_format(" %b  \n%Y "), 
+               limits = as.Date(c(as.Date("2011-8-01"),as.Date("2013-07-01"))), 
+               breaks = seq(as.Date("2012/1/1"), by = "6 month", length.out = 5), 
+               minor_breaks = date_breaks("1 month")) +
+  xlab("Date") + 
+  ylab("Betweenness (Normalized)") +
+  #ggtitle("Item Betweeness, low value items") +
+  CurtisGGplotTheme + 
+  theme(legend.position = "top") +
+  guides(col = guide_legend(ncol = 4)) +
+  theme(legend.title=element_blank())+ 
+  theme(legend.key.width = unit(2.1, "cm"))+
+  scale_colour_manual(values = getPalette(colourCount)[2:11]) +
+  scale_shape_manual(values = c(17, 15,0,7, 1,18, 5,8,32,32)) +
+  scale_linetype_manual(values = c(2,3,4,5,6,2,3,4,1))
 
 # 10 x 5.5in for paper version
 # pdg 10w x 5.8h
 
-
-```
+ggsave(
+  file = "figs/betweenness_TopMoneyItems_LoVal.pdf",
+  betweenness_TopMoneyItems_LoVal, 
+  width = 10,
+  height = 5.5,
+  units = "in"
+)
